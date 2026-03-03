@@ -1,70 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Anti Boncos Tool</title>
 </head>
 <body>
 
-  <h1>Selamat Datang di Anti Boncos Tool 🎉</h1>
-
   <h2>Login</h2>
 
-<input type="email" id="email" placeholder="Masukkan email">
-<button onclick="login()">Login</button>
-
-<script>
-async function login() {
-  const email = document.getElementById("email").value;
-
-  if (!email) {
-    alert("Masukkan email dulu");
-    return;
-  }
-
-  const deviceId = localStorage.getItem("deviceId") || crypto.randomUUID();
-  localStorage.setItem("deviceId", deviceId);
-
-  const response = await fetch("/.netlify/functions/device-check", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ email, deviceId })
-  });
-
-  const data = await response.json();
-  alert(JSON.stringify(data));
-}
-</script>
+  <input type="email" id="email" placeholder="Masukkan email" />
+  <button onclick="login()">Login</button>
 
   <script>
-    async function testApi() {
-      const response = await fetch("/.netlify/functions/device-check");
-      const data = await response.json();
-      alert(JSON.stringify(data));
+    async function login() {
+
+      const email = document.getElementById("email").value.trim();
+
+      if (!email) {
+        alert("Masukkan email dulu");
+        return;
+      }
+
+      // Ambil / buat device ID
+      let deviceId = localStorage.getItem("deviceId");
+
+      if (!deviceId) {
+        deviceId = crypto.randomUUID();
+        localStorage.setItem("deviceId", deviceId);
+      }
+
+      try {
+        const response = await fetch("/.netlify/functions/device-check", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, deviceId })
+        });
+
+        const data = await response.json();
+
+        alert(JSON.stringify(data));
+
+        if (data.success) {
+          alert("Login berhasil ✅");
+        }
+
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
     }
   </script>
-<h2>Login Test</h2>
 
-<input type="email" id="email" placeholder="Masukkan email">
-<button onclick="login()">Login</button>
-
-<script>
-async function login() {
-  const email = document.getElementById("email").value;
-
-  const deviceId = localStorage.getItem("deviceId") || crypto.randomUUID();
-  localStorage.setItem("deviceId", deviceId);
-
-  const response = await fetch("/.netlify/functions/device-check", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, deviceId })
-  });
-
-  const data = await response.json();
-  alert(data.message);
-}
-</script>
 </body>
 </html>
