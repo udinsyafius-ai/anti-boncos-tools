@@ -3,25 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <title>Anti Boncos Tool</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      text-align: center;
+      padding-top: 80px;
+    }
+
+    .card {
+      background: white;
+      width: 350px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e4ed8;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
 </head>
+
 <body>
 
-  <h2>Login</h2>
+  <!-- LOGIN PAGE -->
+  <div id="loginPage" class="card">
+    <h2>Login</h2>
 
-  <input type="email" id="email" placeholder="Masukkan email" />
-  <button onclick="login()">Login</button>
+    <input type="email" id="email" placeholder="Masukkan email" />
+    <button onclick="login()">Login</button>
+
+    <div id="errorMessage" class="error"></div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div id="dashboardPage" class="card hidden">
+    <h2>Dashboard</h2>
+    <p>Selamat datang di Anti Boncos Tool 🚀</p>
+    <button onclick="logout()">Logout</button>
+  </div>
 
   <script>
     async function login() {
 
       const email = document.getElementById("email").value.trim();
+      const errorDiv = document.getElementById("errorMessage");
+
+      errorDiv.innerText = "";
 
       if (!email) {
-        alert("Masukkan email dulu");
+        errorDiv.innerText = "Masukkan email terlebih dahulu.";
         return;
       }
 
-      // Ambil / buat device ID
       let deviceId = localStorage.getItem("deviceId");
 
       if (!deviceId) {
@@ -40,15 +105,36 @@
 
         const data = await response.json();
 
-        alert(JSON.stringify(data));
-
         if (data.success) {
-          alert("Login berhasil ✅");
+
+          // simpan status login
+          localStorage.setItem("isLoggedIn", "true");
+
+          showDashboard();
+
+        } else {
+          errorDiv.innerText = data.error || data.message;
         }
 
       } catch (error) {
-        alert("Error: " + error.message);
+        errorDiv.innerText = "Terjadi kesalahan server.";
       }
+    }
+
+    function showDashboard() {
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("dashboardPage").classList.remove("hidden");
+    }
+
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      document.getElementById("dashboardPage").classList.add("hidden");
+      document.getElementById("loginPage").classList.remove("hidden");
+    }
+
+    // Auto login kalau sudah login sebelumnya
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      showDashboard();
     }
   </script>
 
