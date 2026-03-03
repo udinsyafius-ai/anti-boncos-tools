@@ -4,6 +4,23 @@
   <title>Anti Boncos Tool</title>
 </head>
 <body>
+
   <h1>Deploy Berhasil 🎉</h1>
+
+  <button onclick="testApi()">Test API</button>
+
+  <script>
+    async function testApi() {
+      const response = await fetch("/api/device-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "test@gmail.com" })
+      });
+
+      const data = await response.json();
+      alert(JSON.stringify(data));
+    }
+  </script>
+
 </body>
 </html>
