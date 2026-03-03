@@ -7,7 +7,35 @@
 
   <h1>Deploy Berhasil 🎉</h1>
 
-  <button onclick="testApi()">Test API</button>
+  <h2>Login</h2>
+
+<input type="email" id="email" placeholder="Masukkan email">
+<button onclick="login()">Login</button>
+
+<script>
+async function login() {
+  const email = document.getElementById("email").value;
+
+  if (!email) {
+    alert("Masukkan email dulu");
+    return;
+  }
+
+  const deviceId = localStorage.getItem("deviceId") || crypto.randomUUID();
+  localStorage.setItem("deviceId", deviceId);
+
+  const response = await fetch("/.netlify/functions/device-check", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, deviceId })
+  });
+
+  const data = await response.json();
+  alert(data.message);
+}
+</script>
 
   <script>
     async function testApi() {
@@ -16,6 +44,27 @@
       alert(JSON.stringify(data));
     }
   </script>
+<h2>Login Test</h2>
 
+<input type="email" id="email" placeholder="Masukkan email">
+<button onclick="login()">Login</button>
+
+<script>
+async function login() {
+  const email = document.getElementById("email").value;
+
+  const deviceId = localStorage.getItem("deviceId") || crypto.randomUUID();
+  localStorage.setItem("deviceId", deviceId);
+
+  const response = await fetch("/.netlify/functions/device-check", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, deviceId })
+  });
+
+  const data = await response.json();
+  alert(data.message);
+}
+</script>
 </body>
 </html>
