@@ -528,6 +528,11 @@
     </main>
 
     <script>
+
+if (localStorage.getItem("isLoggedIn") !== "true") {
+    window.location.href = "/";
+}
+
         let currentTab = 'profit';
 
         // Utility: Format IDR
