@@ -1,0 +1,88 @@
+<!DOCTYPE html><html>
+<head>
+<meta charset="UTF-8">
+<title>Anti Boncos Tool</title><style>
+
+body{
+font-family:Arial;
+background:#f3f4f6;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.card{
+background:white;
+padding:40px;
+border-radius:10px;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+width:400px;
+text-align:center;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:10px 0;
+border-radius:5px;
+border:1px solid #ddd;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#1d4ed8;
+}
+
+.result{
+margin-top:20px;
+font-size:20px;
+font-weight:bold;
+}
+
+.logout{
+margin-top:20px;
+background:#ef4444;
+}
+
+</style></head><body><div class="card"><h2>ROAS Calculator</h2><input id="harga" placeholder="Harga Produk"><input id="hpp" placeholder="HPP Produk"><input id="biaya" placeholder="Biaya lain"><button onclick="hitung()">Hitung ROAS Impas</button>
+
+<div id="hasil" class="result"></div><button class="logout" onclick="logout()">Logout</button>
+
+</div><script>
+
+function hitung(){
+
+const harga=parseFloat(document.getElementById("harga").value)
+const hpp=parseFloat(document.getElementById("hpp").value)
+const biaya=parseFloat(document.getElementById("biaya").value)||0
+
+if(!harga||!hpp){
+alert("Isi harga dan HPP")
+return
+}
+
+const total=hpp+biaya
+const roas=harga/total
+
+document.getElementById("hasil").innerText="ROAS Impas : "+roas.toFixed(2)
+
+}
+
+function logout(){
+localStorage.removeItem("isLoggedIn")
+window.location.href="/"
+}
+
+</script></body>
+</html>
