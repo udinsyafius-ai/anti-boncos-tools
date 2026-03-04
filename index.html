@@ -75,6 +75,16 @@
   </div>
 
   <script>
+    // AUTO LOGIN JIKA SUDAH LOGIN DI DEVICE INI
+window.onload = function() {
+
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+  if (isLoggedIn === "true") {
+    showDashboard();
+  }
+
+};
     async function login() {
 
       const email = document.getElementById("email").value.trim();
