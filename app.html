@@ -1,88 +1,542 @@
-<!DOCTYPE html><html>
-<head>
-<meta charset="UTF-8">
-<title>Anti Boncos Tool</title><style>
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Calculator, 
+  TrendingUp, 
+  Target, 
+  Download, 
+  RefreshCcw, 
+  Info, 
+  ChevronRight, 
+  AlertCircle,
+  TrendingDown,
+  Percent,
+  ShoppingCart,
+  Package,
+  Wallet,
+  Zap,
+  MousePointer2,
+  BarChart3
+} from 'lucide-react';
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer, 
+  Tooltip as RechartsTooltip, 
+  Legend 
+} from 'recharts';
 
-body{
-font-family:Arial;
-background:#f3f4f6;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+// --- Utility Functions ---
+const formatIDR = (value) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+const formatDecimal = (value) => {
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+};
+
+// --- Components ---
+
+const Tooltip = ({ text }) => (
+  <span className="group relative inline-block ml-1 align-middle leading-none">
+    <Info size={14} className="text-slate-400 cursor-help" />
+    <span className="invisible group-hover:visible absolute z-50 w-48 p-2 mt-1 text-[10px] leading-relaxed text-white bg-slate-800 rounded shadow-lg -left-20 bottom-full mb-2 transition-opacity duration-200 opacity-0 group-hover:opacity-100 font-normal normal-case block break-words">
+      {text}
+      <span className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-800 block"></span>
+    </span>
+  </span>
+);
+
+const InputGroup = ({ label, value, onChange, type = "number", suffix, prefix, tooltip }) => (
+  <div className="mb-4 w-full">
+    <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 leading-tight">
+      {label} {tooltip && <Tooltip text={tooltip} />}
+    </label>
+    <div className="relative">
+      {prefix && (
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
+          {prefix}
+        </span>
+      )}
+      <input
+        type={type}
+        className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${prefix ? 'pl-10' : ''} ${suffix ? 'pr-10' : ''}`}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {suffix && (
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
+          {suffix}
+        </span>
+      )}
+    </div>
+  </div>
+);
+
+const ResultCard = ({ label, value, colorClass = "text-slate-900 dark:text-white", subtitle, warning, tooltip }) => (
+  <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between transition-all hover:shadow-md min-h-[100px]">
+    <div>
+      <div className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 flex items-center leading-snug">
+        <span className="break-words max-w-full">{label}</span> {tooltip && <Tooltip text={tooltip} />}
+      </div>
+      <p className={`text-lg md:text-xl font-black break-words leading-tight ${colorClass}`}>{value}</p>
+      {subtitle && <p className="text-[10px] text-slate-400 mt-1 leading-tight">{subtitle}</p>}
+    </div>
+    {warning && (
+      <div className="mt-2 flex items-center gap-1 text-red-500 text-[10px] font-bold leading-tight bg-red-50 dark:bg-red-900/10 p-1.5 rounded-lg">
+        <AlertCircle size={12} className="shrink-0" /> <span className="break-words">{warning}</span>
+      </div>
+    )}
+  </div>
+);
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('profit');
+  
+  const [formData, setFormData] = useState({
+    sku: 'SKU-001',
+    namaProduk: 'Produk Contoh',
+    hargaModal: 50000,
+    hargaJualAwal: 100000,
+    adminMarketplace: 6,
+    freeOngkir: 4,
+    packing: 2000,
+    biayaLain: 0,
+    totalBiayaIklan: 0,
+    jumlahKlik: 0,
+    jumlahPesanan: 0,
+    sliderPersen: 0,
+    targetMarginRp: 15000 
+  });
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: field === 'sku' || field === 'namaProduk' ? value : parseFloat(value) || 0
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      sku: '',
+      namaProduk: '',
+      hargaModal: 0,
+      hargaJualAwal: 0,
+      adminMarketplace: 0,
+      freeOngkir: 0,
+      packing: 0,
+      biayaLain: 0,
+      totalBiayaIklan: 0,
+      jumlahKlik: 0,
+      jumlahPesanan: 0,
+      sliderPersen: 0,
+      targetMarginRp: 0
+    });
+  };
+
+  const results = useMemo(() => {
+    const { 
+      hargaModal, hargaJualAwal, adminMarketplace, freeOngkir, 
+      packing, biayaLain, totalBiayaIklan, 
+      jumlahKlik, jumlahPesanan, sliderPersen, targetMarginRp
+    } = formData;
+
+    const hargaSimulasi = hargaJualAwal * (1 + sliderPersen / 100);
+    const biayaAdmin = hargaSimulasi * (adminMarketplace / 100);
+    const biayaFreeOngkir = hargaSimulasi * (freeOngkir / 100);
+    
+    const totalBiayaTetap = hargaModal + biayaAdmin + biayaFreeOngkir + packing + biayaLain;
+    const marginKotor = hargaSimulasi - hargaModal;
+    const marginBersihAwal = hargaSimulasi - totalBiayaTetap;
+    
+    const cpc = jumlahKlik > 0 ? totalBiayaIklan / jumlahKlik : 0;
+    const cr = jumlahKlik > 0 ? (jumlahPesanan / jumlahKlik) * 100 : 0;
+    const cpa = jumlahPesanan > 0 ? totalBiayaIklan / jumlahPesanan : 0;
+    const omzet = hargaSimulasi * jumlahPesanan;
+    const roasAktual = totalBiayaIklan > 0 ? omzet / totalBiayaIklan : 0;
+    
+    const profitPerOrder = marginBersihAwal - cpa;
+    const totalProfit = profitPerOrder * jumlahPesanan;
+
+    const maxIklanBEP = hargaSimulasi - totalBiayaTetap;
+    const roasBEP = maxIklanBEP > 0 ? hargaSimulasi / maxIklanBEP : 0;
+
+    const maxIklanTarget = hargaSimulasi - totalBiayaTetap - targetMarginRp;
+    const roasTarget = maxIklanTarget > 0 ? hargaSimulasi / maxIklanTarget : 0;
+
+    let statusROAS = "N/A";
+    let statusColor = "text-slate-500";
+    if (roasAktual > 0) {
+      if (roasAktual < roasBEP) {
+        statusROAS = "RUGI";
+        statusColor = "text-red-600";
+      } else {
+        statusROAS = "UNTUNG";
+        statusColor = "text-emerald-600";
+      }
+    }
+
+    const pieData = [
+      { name: 'Modal', value: hargaModal, color: '#94a3b8' },
+      { name: 'Admin', value: biayaAdmin, color: '#f87171' },
+      { name: 'Free Ongkir', value: biayaFreeOngkir, color: '#fb923c' },
+      { name: 'Packing', value: packing, color: '#fbbf24' },
+      { name: 'Iklan/CPA', value: Math.max(0, cpa), color: '#3b82f6' },
+      { name: 'Profit', value: Math.max(0, profitPerOrder), color: '#10b981' }
+    ];
+
+    return {
+      hargaSimulasi,
+      marginKotor,
+      biayaAdmin,
+      biayaFreeOngkir,
+      marginBersihAwal,
+      cpc,
+      cr,
+      cpa,
+      omzet,
+      roasAktual,
+      profitPerOrder,
+      totalProfit,
+      roasImpas: roasBEP,
+      maxIklanBEP,
+      maxIklanTarget,
+      roasTarget,
+      statusROAS,
+      statusColor,
+      pieData
+    };
+  }, [formData]);
+
+  const exportCSV = () => {
+    const headers = [
+      "SKU", "NAMA PRODUK", "HARGA JUAL", "MODAL", "ROAS IMPAS", "ROAS TARGET"
+    ];
+    const row = [
+      formData.sku, formData.namaProduk, results.hargaSimulasi.toFixed(0), 
+      formData.hargaModal, results.roasImpas.toFixed(2), results.roasTarget.toFixed(2)
+    ];
+    const csvContent = [headers.join(","), row.join(",")].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Anti-Boncos-${formData.sku || 'Report'}.csv`;
+    link.click();
+  };
+
+  const theme = 'blue';
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-8 overflow-x-hidden">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className={`p-2 bg-blue-600 rounded-xl text-white shadow-lg shrink-0`}>
+              <Calculator size={20} className="sm:w-6 sm:h-6" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-black tracking-tight truncate uppercase">ANTI BONCOS</h1>
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none truncate">HITUNG DULU BARU JUAL</p>
+            </div>
+          </div>
+          <button 
+            onClick={exportCSV}
+            className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-3 py-2 rounded-xl text-xs font-bold transition-transform active:scale-95 shadow-lg shrink-0"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">EXPORT CSV</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Tabs Navigation */}
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 pb-2">
+        <div className="flex gap-2 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl">
+          <button 
+            onClick={() => setActiveTab('profit')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-black transition-all text-xs border-2 ${activeTab === 'profit' ? 'border-white bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'border-transparent text-slate-500'}`}
+          >
+            <Wallet size={16} />
+            <span className="truncate">Analisis Profit</span>
+          </button>
+          <button 
+            onClick={() => setActiveTab('roas')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-black transition-all text-xs border-2 ${activeTab === 'roas' ? 'border-white bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'border-transparent text-slate-500'}`}
+          >
+            <Target size={16} />
+            <span className="truncate">Target ROAS</span>
+          </button>
+        </div>
+      </div>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
+        
+        {/* Sidebar Input */}
+        <section className="lg:col-span-4 space-y-6">
+          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden relative">
+            <div className={`absolute top-0 left-0 w-1.5 h-full bg-blue-600`}></div>
+            
+            <h2 className="text-sm sm:text-lg font-black mb-5 flex items-center gap-2 text-slate-800 dark:text-slate-100 uppercase tracking-tight">
+              <Package size={18} className={`text-blue-600 shrink-0`} /> 
+              Data & Struktur Produk
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+              <InputGroup label="SKU" type="text" value={formData.sku} onChange={(v) => handleInputChange('sku', v)} />
+              <InputGroup label="Nama Produk" type="text" value={formData.namaProduk} onChange={(v) => handleInputChange('namaProduk', v)} />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+              <InputGroup label="HPP / Modal" prefix="Rp" value={formData.hargaModal} onChange={(v) => handleInputChange('hargaModal', v)} />
+              <InputGroup label="Harga Jual" prefix="Rp" value={formData.hargaJualAwal} onChange={(v) => handleInputChange('hargaJualAwal', v)} />
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+              <InputGroup label="Admin Marketplace (%)" suffix="%" value={formData.adminMarketplace} onChange={(v) => handleInputChange('adminMarketplace', v)} />
+              <InputGroup label="Biaya Promo" suffix="%" value={formData.freeOngkir} onChange={(v) => handleInputChange('freeOngkir', v)} />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+              <InputGroup label="Biaya Packing (Rp)" prefix="Rp" value={formData.packing} onChange={(v) => handleInputChange('packing', v)} />
+              <InputGroup label="Biaya per Order (Rp)" prefix="Rp" value={formData.biayaLain} onChange={(v) => handleInputChange('biayaLain', v)} />
+            </div>
+
+            {activeTab === 'profit' ? (
+              <div className="space-y-6">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl mb-4 border border-slate-100 dark:border-slate-700/50">
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-500">Simulasi Harga</label>
+                    <span className="text-xs font-black px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700">{formData.sliderPersen}%</span>
+                  </div>
+                  <input type="range" min="-50" max="50" step="1" value={formData.sliderPersen} onChange={(e) => handleInputChange('sliderPersen', e.target.value)} className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 mb-2" />
+                  <div className="mt-3 text-center">
+                    <p className="text-xl font-black text-blue-600 dark:text-blue-400 leading-none">{formatIDR(results.hargaSimulasi)}</p>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                  <h2 className="text-sm font-black mb-5 flex items-center gap-2 uppercase tracking-tight">
+                    <TrendingUp size={18} className={`text-blue-600 shrink-0`} /> Performa Iklan
+                  </h2>
+                  <InputGroup label="Total Ad Spend" prefix="Rp" value={formData.totalBiayaIklan} onChange={(v) => handleInputChange('totalBiayaIklan', v)} />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                    <InputGroup label="Jumlah Klik" value={formData.jumlahKlik} onChange={(v) => handleInputChange('jumlahKlik', v)} />
+                    <InputGroup label="Order Iklan" value={formData.jumlahPesanan} onChange={(v) => handleInputChange('jumlahPesanan', v)} />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 pt-6 border-t border-slate-100 dark:border-slate-800">
+                <h2 className="text-sm font-black mb-5 flex items-center gap-2 uppercase tracking-tight">
+                  <Target size={18} className={`text-blue-600 shrink-0`} /> 
+                  Target Laba
+                </h2>
+                <InputGroup 
+                  label="Target Laba Bersih (Rp)" 
+                  prefix="Rp" 
+                  value={formData.targetMarginRp} 
+                  onChange={(v) => handleInputChange('targetMarginRp', v)} 
+                  tooltip="Profit bersih per order yang ingin dicapai."
+                />
+              </div>
+            )}
+
+            <div className="mt-6 flex gap-3">
+              <button className={`flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-blue-500/20 active:scale-95 uppercase text-xs tracking-widest`}>
+                HITUNG HASIL
+              </button>
+              <button onClick={resetForm} className="p-4 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-sm">
+                <RefreshCcw size={20} />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Dashboard View */}
+        <section className="lg:col-span-8 space-y-6">
+          
+          {activeTab === 'profit' ? (
+            /* --- Analisis Profit --- */
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <ResultCard label="Margin Kotor" value={formatIDR(results.marginKotor)} subtitle="Gross Margin" />
+                <ResultCard label="Margin Bersih" value={formatIDR(results.marginBersihAwal)} subtitle="Net (Pre-Ads)" colorClass="text-blue-600" />
+                <ResultCard label="ROAS Impas" value={results.roasImpas.toFixed(2) + "x"} subtitle="BEP" colorClass="text-amber-600" />
+                <ResultCard label="Laba Bersih / Order" value={formatIDR(results.profitPerOrder)} subtitle="Final Net Profit" colorClass={results.profitPerOrder >= 0 ? "text-emerald-600" : "text-red-600"} />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                  <h3 className="text-xs font-black mb-6 uppercase tracking-widest text-slate-400">Distribusi Biaya</h3>
+                  <div className="h-[250px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={results.pieData} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value">
+                          {results.pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />)}
+                        </Pie>
+                        <RechartsTooltip formatter={(v) => formatIDR(v)} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                        <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 'bold' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                  <h3 className="text-xs font-black mb-6 uppercase tracking-widest text-slate-400 flex items-center justify-between">
+                    Performa Iklan
+                    <BarChart3 size={16} className="text-blue-500" />
+                  </h3>
+                  <div className="space-y-4">
+                    {[
+                      { icon: <MousePointer2 size={14}/>, label: "CPC", value: formatIDR(results.cpc), desc: "Biaya per klik" },
+                      { icon: <Percent size={14}/>, label: "Konversi", value: formatDecimal(results.cr) + "%", desc: "Tingkat pembelian" },
+                      { icon: <Zap size={14}/>, label: "CPA", value: formatIDR(results.cpa), desc: "Biaya per order" },
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-white dark:bg-slate-700 rounded-lg text-slate-400 shadow-sm">{item.icon}</div>
+                          <div className="leading-tight">
+                            <p className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">{item.label}</p>
+                            <p className="text-[9px] font-medium text-slate-400">{item.desc}</p>
+                          </div>
+                        </div>
+                        <span className="font-black text-sm">{item.value}</span>
+                      </div>
+                    ))}
+                    <div className={`p-4 rounded-2xl border-2 border-l-8 ${results.roasAktual >= results.roasImpas ? 'bg-emerald-50 border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-900/30' : 'bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-900/30'}`}>
+                      <div className="flex justify-between items-end">
+                        <div className="leading-tight">
+                          <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${results.roasAktual >= results.roasImpas ? 'text-emerald-600' : 'text-red-600'}`}>ROAS Aktual</p>
+                          <p className="text-[9px] text-slate-500">Return on Ad Spend</p>
+                        </div>
+                        <span className={`text-2xl font-black ${results.statusColor}`}>{results.roasAktual.toFixed(2)}x</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+                <div className="bg-blue-600 p-5 text-white">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-center">Ringkasan Laba Bersih</h3>
+                </div>
+                <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-700">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Laba Bersih / Order</p>
+                    <p className={`text-2xl font-black ${results.profitPerOrder >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{formatIDR(results.profitPerOrder)}</p>
+                  </div>
+                  <div className="flex flex-col items-center justify-center p-6 bg-slate-900 rounded-3xl shadow-xl">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Laba Bersih</p>
+                    <p className={`text-2xl font-black ${results.totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatIDR(results.totalProfit)}</p>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-slate-50 dark:bg-slate-900/50 space-y-4">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Zap size={14} className="text-blue-500"/> Market Intelligence
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className={`p-4 rounded-2xl border bg-white dark:bg-slate-800 ${results.roasAktual >= results.roasImpas ? 'border-emerald-100' : 'border-red-100'}`}>
+                       <h5 className={`text-[10px] font-black uppercase mb-2 ${results.roasAktual >= results.roasImpas ? 'text-emerald-600' : 'text-red-600'}`}>Efisiensi Iklan</h5>
+                       <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                         {results.roasAktual >= results.roasImpas 
+                           ? "Iklan dalam zona aman dan menguntungkan."
+                           : "Biaya iklan memakan seluruh margin keuntungan."}
+                       </p>
+                    </div>
+                    <div className="p-4 rounded-2xl border border-blue-100 bg-white dark:bg-slate-800">
+                       <h5 className="text-[10px] font-black text-blue-600 uppercase mb-2">Kualitas Konversi</h5>
+                       <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                         {results.cr < 2 ? "Konversi rendah. Perbaiki landing page." : "Konversi stabil di atas benchmark pasar."}
+                       </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <div className="p-5 bg-blue-50 dark:bg-blue-900/10 rounded-3xl border border-blue-100 dark:border-blue-900/30">
+                   <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 flex items-center gap-1">
+                     <AlertCircle size={14}/> Batas Aman Profit
+                   </h4>
+                   <p className="text-xs text-slate-600 dark:text-slate-400 font-bold">
+                     Margin pre-iklan: {formatIDR(results.marginBersihAwal)}
+                   </p>
+                 </div>
+                 <div className="p-5 bg-amber-50 dark:bg-amber-900/10 rounded-3xl border border-amber-100 dark:border-amber-900/30">
+                   <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-2 flex items-center gap-1">
+                     <RefreshCcw size={14}/> Batas Aman ROAS
+                   </h4>
+                   <p className="text-xs text-slate-600 dark:text-slate-400 font-bold">
+                     Min ROAS BEP: {results.roasImpas.toFixed(2)}x
+                   </p>
+                 </div>
+              </div>
+            </div>
+          ) : (
+            /* --- Analisis Target ROAS --- */
+            <div className="space-y-6">
+              <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                <div className="flex items-center gap-2 mb-6 text-amber-600">
+                  <AlertCircle size={18} />
+                  <h2 className="font-black uppercase tracking-widest text-[10px] leading-none">TARGET ROAS IMPAS</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <ResultCard label="Max Biaya / Order" value={formatIDR(results.maxIklanBEP)} subtitle="BEP Ad Spend" colorClass="text-slate-600" />
+                  <ResultCard label="ROAS Impas" value={results.roasImpas.toFixed(2) + "x"} subtitle="BEP" colorClass="text-emerald-600" />
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                <div className="flex items-center gap-2 mb-6 text-blue-600">
+                  <Target size={18} />
+                  <h2 className="font-black uppercase tracking-widest text-[10px] leading-none">TARGET PROFIT (Rp {formatIDR(formData.targetMarginRp)})</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <ResultCard 
+                    label="Budget Iklan / Order" 
+                    value={results.maxIklanTarget > 0 ? formatIDR(results.maxIklanTarget) : "Rp 0"} 
+                    subtitle="Target Ad Spend" 
+                    colorClass={results.maxIklanTarget > 0 ? "text-blue-600" : "text-red-500"}
+                    warning={results.maxIklanTarget <= 0 ? "Target laba tidak realistis." : null}
+                  />
+                  <ResultCard 
+                    label="ROAS Target" 
+                    value={results.maxIklanTarget > 0 ? results.roasTarget.toFixed(2) + "x" : "N/A"} 
+                    subtitle="Min Performance" 
+                    colorClass="text-emerald-600"
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-3xl border border-blue-100 dark:border-blue-900/30">
+                <h4 className="font-black text-blue-600 mb-4 flex items-center gap-2 text-xs">
+                  <Info size={16} /> PEDOMAN STRATEGI:
+                </h4>
+                <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-3 font-semibold leading-relaxed">
+                  <li className="flex gap-2">
+                    <span className="text-blue-600 shrink-0">●</span>
+                    <span>Jika <strong>ROAS Iklan</strong> lebih rendah dari <strong>ROAS Impas</strong>, segera hentikan campaign karena Anda merugi.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-blue-600 shrink-0">●</span>
+                    <span>Untuk mencapai target laba bersih, pastikan biaya akuisisi (CPA) tidak melebihi <strong>Budget Iklan / Order</strong>.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
 }
-
-.card{
-background:white;
-padding:40px;
-border-radius:10px;
-box-shadow:0 10px 30px rgba(0,0,0,0.1);
-width:400px;
-text-align:center;
-}
-
-input{
-width:100%;
-padding:10px;
-margin:10px 0;
-border-radius:5px;
-border:1px solid #ddd;
-}
-
-button{
-width:100%;
-padding:12px;
-background:#2563eb;
-color:white;
-border:none;
-border-radius:5px;
-cursor:pointer;
-font-weight:bold;
-}
-
-button:hover{
-background:#1d4ed8;
-}
-
-.result{
-margin-top:20px;
-font-size:20px;
-font-weight:bold;
-}
-
-.logout{
-margin-top:20px;
-background:#ef4444;
-}
-
-</style></head><body><div class="card"><h2>ROAS Calculator</h2><input id="harga" placeholder="Harga Produk"><input id="hpp" placeholder="HPP Produk"><input id="biaya" placeholder="Biaya lain"><button onclick="hitung()">Hitung ROAS Impas</button>
-
-<div id="hasil" class="result"></div><button class="logout" onclick="logout()">Logout</button>
-
-</div><script>
-
-function hitung(){
-
-const harga=parseFloat(document.getElementById("harga").value)
-const hpp=parseFloat(document.getElementById("hpp").value)
-const biaya=parseFloat(document.getElementById("biaya").value)||0
-
-if(!harga||!hpp){
-alert("Isi harga dan HPP")
-return
-}
-
-const total=hpp+biaya
-const roas=harga/total
-
-document.getElementById("hasil").innerText="ROAS Impas : "+roas.toFixed(2)
-
-}
-
-function logout(){
-localStorage.removeItem("isLoggedIn")
-window.location.href="/"
-}
-
-</script></body>
-</html>
