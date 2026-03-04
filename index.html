@@ -121,10 +121,9 @@
       }
     }
 
-    function showDashboard() {
-      document.getElementById("loginPage").classList.add("hidden");
-      document.getElementById("dashboardPage").classList.remove("hidden");
-    }
+    function showDashboard(){
+window.location.href="app.html";
+}
 
     function logout() {
       localStorage.removeItem("isLoggedIn");
