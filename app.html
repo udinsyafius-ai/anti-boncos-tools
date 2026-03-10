@@ -703,42 +703,54 @@ generateRoasInsight(roasBEP, roasTarget, maxIklanTarget);
         }
 
         function updateChart(modal, admin, promo, pack, ads, profit) {
-            const data = [
-                { label: 'Modal', val: modal, color: '#94a3b8' },
-                { label: 'Admin', val: admin, color: '#f87171' },
-                { label: 'Promo', val: promo, color: '#fb923c' },
-                { label: 'Pack', val: pack, color: '#fbbf24' },
-                { label: 'Iklan', val: ads, color: '#3b82f6' },
-                { label: 'Untung', val: profit, color: '#10b981' }
-            ];
-            
-            const total = data.reduce((a, b) => a + b.val, 0);
-            let offset = 0;
-            const svg = document.getElementById('pie-chart');
-            const legend = document.getElementById('chart-legend');
-            
-            svg.innerHTML = '<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#f1f5f9" stroke-width="5"></circle>';
-            legend.innerHTML = '';
 
-            data.forEach(item => {
-                if(item.val <= 0) return;
-                const percent = (item.val / total) * 100;
-                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                circle.setAttribute("cx", "21");
-                circle.setAttribute("cy", "21");
-                circle.setAttribute("r", "15.915");
-                circle.setAttribute("fill", "transparent");
-                circle.setAttribute("stroke", item.color);
-                circle.setAttribute("stroke-width", "5");
-                circle.setAttribute("stroke-dasharray", `${percent} ${100 - percent}`);
-                circle.setAttribute("stroke-dashoffset", 100 - offset + 25);
-                svg.appendChild(circle);
-                offset += percent;
+const data = [
+{ label: 'Modal', val: modal, color: '#94a3b8' },
+{ label: 'Admin', val: admin, color: '#f87171' },
+{ label: 'Promo', val: promo, color: '#fb923c' },
+{ label: 'Pack', val: pack, color: '#fbbf24' },
+{ label: 'Iklan', val: ads, color: '#3b82f6' },
+{ label: 'Untung', val: profit, color: '#10b981' }
+];
 
-                legend.innerHTML += `<div><span style="display:inline-block;width:8px;height:8px;background:${item.color};border-radius:50%;margin-right:5px"></span>${item.label}</div>`;
-            });
-        }
-            function generateInsight(profitPerOrder, roasAktual, roasBEP, konversi, cpa, marginBersih){
+const total = data.reduce((a, b) => a + b.val, 0);
+let offset = 0;
+
+const svg = document.getElementById('pie-chart');
+const legend = document.getElementById('chart-legend');
+
+svg.innerHTML = '<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#f1f5f9" stroke-width="5"></circle>';
+legend.innerHTML = '';
+
+data.forEach(item => {
+
+if(item.val <= 0) return;
+
+const percent = (item.val / total) * 100;
+
+const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+
+circle.setAttribute("cx","21");
+circle.setAttribute("cy","21");
+circle.setAttribute("r","15.915");
+circle.setAttribute("fill","transparent");
+circle.setAttribute("stroke",item.color);
+circle.setAttribute("stroke-width","5");
+circle.setAttribute("stroke-dasharray",`${percent} ${100-percent}`);
+circle.setAttribute("stroke-dashoffset",100-offset+25);
+
+svg.appendChild(circle);
+
+offset += percent;
+
+legend.innerHTML += `<div><span style="display:inline-block;width:8px;height:8px;background:${item.color};border-radius:50%;margin-right:5px"></span>${item.label}</div>`;
+
+});
+
+}
+
+
+function generateInsight(profitPerOrder, roasAktual, roasBEP, konversi, cpa, marginBersih){
 
 let insight = "";
 
@@ -771,22 +783,34 @@ insight += "✔ Margin produk masih aman untuk menjalankan iklan.<br>";
 document.getElementById("insightText").innerHTML = insight;
 
 }
-        }
 
-        function exportCSV() {
+
+function exportCSV(){
+
 const sku = document.getElementById('sku').value;
+
 const headers = "SKU,Produk,Modal,Jual,Profit,ROAS_BEP\n";
-const row = `${sku},${document.getElementById('namaProduk').value},${document.getElementById('hargaModal').value},${document.getElementById('simulasi-price').innerText.replace(/[^0-9]/g,'')},${document.getElementById('sum-profit-order').innerText.replace(/[^0-9]/g,'')},${document.getElementById('res-roas-impas').innerText}`;
 
-const blob = new Blob([headers + row], { type: 'text/csv' });
+const row =
+`${sku},
+${document.getElementById('namaProduk').value},
+${document.getElementById('hargaModal').value},
+${document.getElementById('simulasi-price').innerText.replace(/[^0-9]/g,'')},
+${document.getElementById('sum-profit-order').innerText.replace(/[^0-9]/g,'')},
+${document.getElementById('res-roas-impas').innerText}`;
+
+const blob = new Blob([headers + row],{type:'text/csv'});
+
 const url = window.URL.createObjectURL(blob);
+
 const a = document.createElement('a');
-a.setAttribute('href', url);
-a.setAttribute('download', `Anti-Boncos-${sku}.csv`);
+
+a.setAttribute('href',url);
+a.setAttribute('download',`Anti-Boncos-${sku}.csv`);
+
 a.click();
+
 }
-
-
 /* ===== ROAS INSIGHT ===== */
 
 function generateRoasInsight(roasBEP, roasTarget, maxIklanTarget){
