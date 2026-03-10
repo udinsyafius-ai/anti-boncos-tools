@@ -31,7 +31,33 @@
             line-height: 1.5;
             padding-bottom: 40px;
         }
+.dark-mode {
+background:#0f172a;
+color:#e2e8f0;
+}
 
+.dark-mode .card {
+background:#1e293b;
+border:1px solid #334155;
+}
+
+.dark-mode input {
+background:#0f172a;
+color:white;
+border:1px solid #334155;
+}
+
+.dark-mode .summary-card {
+background:#1e293b;
+}
+
+.dark-mode .summary-header {
+background:#1e293b;
+}
+
+.dark-mode header {
+background:#020617;
+}
         /* --- Header --- */
         header {
             position: sticky;
@@ -321,6 +347,10 @@
             </div>
             <button class="btn-primary" style="width: auto; padding: 8px 16px; margin: 0; font-size: 10px;" onclick="exportCSV()">EXPORT CSV</button>
         </div>
+        <button onclick="toggleTheme()" id="themeToggle"
+style="margin-left:10px;padding:8px 12px;border-radius:8px;border:none;background:#2563eb;color:white;cursor:pointer;">
+🌙 Dark
+</button>
     </header>
 
     <div class="tabs-nav">
@@ -375,11 +405,11 @@
 
             <div class="grid-2">
                 <div class="input-group">
-                    <label>Packing (Rp)</label>
+                    <label>Biaya Packing (Rp)</label>
                     <input type="number" id="packing" value="2000">
                 </div>
                 <div class="input-group">
-                    <label>Biaya Lain (Rp)</label>
+                    <label>Biaya Per-pesanan (Rp)</label>
                     <input type="number" id="biayaLain" value="0">
                 </div>
             </div>
@@ -494,7 +524,24 @@
                     </div>
                 </div>
             </div>
+<div id="insightBox" style="
+margin-top:20px;
+background:#f8fafc;
+border-radius:12px;
+padding:20px;
+border:1px solid #e2e8f0;
+">
 
+<b>📊 Insight Anti-Boncos</b>
+
+<div id="insightText" style="
+margin-top:10px;
+font-size:14px;
+line-height:1.6;
+color:#334155;
+"></div>
+
+</div>
             <div id="view-roas" class="hidden">
                 <div class="card" style="margin-bottom: 20px;">
                     <h3 class="res-label" style="color: var(--warning)">Target ROAS Impas</h3>
@@ -509,7 +556,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="card">
                     <h3 class="res-label" style="color: var(--primary)">Target Performa</h3>
                     <div class="grid-2">
@@ -525,8 +571,24 @@
                 </div>
             </div>
         </section>
-    </main>
+        <!-- Insight Target ROAS -->
+<div style="
+margin:20px;
+background:#f8fafc;
+border:1px solid #e2e8f0;
+border-radius:12px;
+padding:18px;
+font-size:14px;
+line-height:1.6;
+">
+<b>📊 Insight Target ROAS</b>
 
+<div id="roasInsightText" style="margin-top:10px;">
+Klik tombol hitung hasil untuk melihat analisis target ROAS.
+</div>
+
+</div>
+        </main>
     <script>
 
 if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -629,12 +691,15 @@ if (localStorage.getItem("isLoggedIn") !== "true") {
             document.getElementById('sum-profit-order').className = 'res-value ' + (profitPerOrder >= 0 ? 'text-success' : 'text-danger');
 
             // Update UI - View 2
-            document.getElementById('target-max-bep').innerText = formatIDR(marginBersihAwal);
-            document.getElementById('target-roas-bep').innerText = roasBEP.toFixed(2) + 'x';
-            document.getElementById('target-budget-cpa').innerText = formatIDR(Math.max(0, maxIklanTarget));
-            document.getElementById('target-roas-final').innerText = (maxIklanTarget > 0 ? roasTarget.toFixed(2) : 'N/A') + 'x';
+document.getElementById('target-max-bep').innerText = formatIDR(marginBersihAwal);
+document.getElementById('target-roas-bep').innerText = roasBEP.toFixed(2) + 'x';
+document.getElementById('target-budget-cpa').innerText = formatIDR(Math.max(0, maxIklanTarget));
+document.getElementById('target-roas-final').innerText = (maxIklanTarget > 0 ? roasTarget.toFixed(2) : 'N/A') + 'x';
 
-            updateChart(modal, biayaAdmin, biayaPromo, packing, Math.max(0, cpa), Math.max(0, profitPerOrder));
+updateChart(modal, biayaAdmin, biayaPromo, packing, Math.max(0, cpa), Math.max(0, profitPerOrder));
+
+generateInsight(profitPerOrder, roasAktual, roasBEP, cr, cpa, marginBersihAwal);
+generateRoasInsight(roasBEP, roasTarget, maxIklanTarget);
         }
 
         function updateChart(modal, admin, promo, pack, ads, profit) {
@@ -673,25 +738,113 @@ if (localStorage.getItem("isLoggedIn") !== "true") {
                 legend.innerHTML += `<div><span style="display:inline-block;width:8px;height:8px;background:${item.color};border-radius:50%;margin-right:5px"></span>${item.label}</div>`;
             });
         }
+            function generateInsight(profitPerOrder, roasAktual, roasBEP, konversi, cpa, marginBersih){
 
-        function exportCSV() {
-            const sku = document.getElementById('sku').value;
-            const headers = "SKU,Produk,Modal,Jual,Profit,ROAS_BEP\n";
-            const row = `${sku},${document.getElementById('namaProduk').value},${document.getElementById('hargaModal').value},${document.getElementById('simulasi-price').innerText.replace(/[^0-9]/g,'')},${document.getElementById('sum-profit-order').innerText.replace(/[^0-9]/g,'')},${document.getElementById('res-roas-impas').innerText}`;
-            
-            const blob = new Blob([headers + row], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `Anti-Boncos-${sku}.csv`);
-            a.click();
+let insight = "";
+
+if(profitPerOrder > 0){
+insight += "✔ Produk masih menghasilkan profit dari iklan.<br>";
+}else{
+insight += "⚠ Produk sedang merugi dari iklan.<br>";
+}
+
+if(roasAktual > roasBEP){
+insight += "✔ ROAS iklan berada di atas titik impas.<br>";
+}else{
+insight += "⚠ ROAS iklan berada di bawah titik impas.<br>";
+}
+
+if(konversi < 5){
+insight += "⚠ Konversi produk masih rendah. Ideal marketplace biasanya 8% - 15%.<br>";
+}
+
+if(cpa > marginBersih){
+insight += "⚠ Biaya iklan per order lebih besar dari margin produk.<br>";
+}
+
+if(marginBersih < 10000){
+insight += "⚠ Margin produk terlalu tipis untuk scale iklan marketplace.<br>";
+}else{
+insight += "✔ Margin produk masih aman untuk menjalankan iklan.<br>";
+}
+
+document.getElementById("insightText").innerHTML = insight;
+
+}
         }
 
-        // Initialize
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', calculate);
-        });
-        calculate();
+        function exportCSV() {
+const sku = document.getElementById('sku').value;
+const headers = "SKU,Produk,Modal,Jual,Profit,ROAS_BEP\n";
+const row = `${sku},${document.getElementById('namaProduk').value},${document.getElementById('hargaModal').value},${document.getElementById('simulasi-price').innerText.replace(/[^0-9]/g,'')},${document.getElementById('sum-profit-order').innerText.replace(/[^0-9]/g,'')},${document.getElementById('res-roas-impas').innerText}`;
+
+const blob = new Blob([headers + row], { type: 'text/csv' });
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.setAttribute('href', url);
+a.setAttribute('download', `Anti-Boncos-${sku}.csv`);
+a.click();
+}
+
+
+/* ===== ROAS INSIGHT ===== */
+
+function generateRoasInsight(roasBEP, roasTarget, maxIklanTarget){
+
+let text="";
+
+text += "ROAS Impas: " + roasBEP.toFixed(2) + "x.<br>";
+text += "Artinya setiap Rp1 biaya iklan harus menghasilkan Rp"+roasBEP.toFixed(2)+" omzet agar tidak rugi.<br><br>";
+
+text += "Biaya iklan maksimal per order: Rp"+Math.round(maxIklanTarget).toLocaleString()+".<br>";
+
+text += "Target ROAS: "+roasTarget.toFixed(2)+"x.<br><br>";
+
+if(roasTarget > 20){
+text += "⚠ Target ROAS terlalu tinggi. Produk akan sulit scale dengan iklan marketplace.";
+}
+else if(roasTarget > 10){
+text += "⚠ Target ROAS cukup tinggi. Iklan harus sangat efisien.";
+}
+else{
+text += "✔ Target ROAS masih realistis untuk iklan marketplace.";
+}
+
+document.getElementById("roasInsightText").innerHTML=text;
+
+}
+
+
+// Initialize
+document.querySelectorAll('input').forEach(input => {
+input.addEventListener('input', calculate);
+});
+calculate();
+/* DARK MODE TOGGLE */
+function toggleTheme(){
+
+document.body.classList.toggle("dark-mode");
+
+if(document.body.classList.contains("dark-mode")){
+localStorage.setItem("theme","dark");
+document.getElementById("themeToggle").innerText="☀ Light";
+}else{
+localStorage.setItem("theme","light");
+document.getElementById("themeToggle").innerText="🌙 Dark";
+}
+
+}
+
+window.addEventListener("load", function(){
+
+const theme = localStorage.getItem("theme");
+
+if(theme === "dark"){
+document.body.classList.add("dark-mode");
+document.getElementById("themeToggle").innerText="☀ Light";
+}
+
+});
     </script>
 </body>
 </html>
