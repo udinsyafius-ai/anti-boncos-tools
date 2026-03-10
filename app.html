@@ -699,7 +699,10 @@ document.getElementById('target-roas-final').innerText = (maxIklanTarget > 0 ? r
 updateChart(modal, biayaAdmin, biayaPromo, packing, Math.max(0, cpa), Math.max(0, profitPerOrder));
 
 generateInsight(profitPerOrder, roasAktual, roasBEP, cr, cpa, marginBersihAwal);
+
+if(currentTab === "roas"){
 generateRoasInsight(roasBEP, roasTarget, maxIklanTarget);
+}
         }
 
         function updateChart(modal, admin, promo, pack, ads, profit) {
