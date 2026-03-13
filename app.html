@@ -342,7 +342,7 @@ background:#020617;
                 <div class="logo-box">A</div>
                 <div class="title-group">
                     <h1>ANTI BONCOS</h1>
-                    <p>HITUNG DULU BARU JUAL</p>
+                    <p>Hitung Dulu Baru Jual</p>
                 </div>
             </div>
             <button class="btn-primary" style="width: auto; padding: 8px 16px; margin: 0; font-size: 10px;" onclick="exportCSV()">EXPORT CSV</button>
@@ -355,8 +355,8 @@ style="margin-left:10px;padding:8px 12px;border-radius:8px;border:none;backgroun
 
     <div class="tabs-nav">
         <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('profit')">Analisis Profit</button>
-            <button class="tab-btn" onclick="switchTab('roas')">Target ROAS</button>
+            <button class="tab-btn active" onclick="switchTab('profit')">Hitung Profit</button>
+            <button class="tab-btn" onclick="switchTab('roas')">Hitung ROAS</button>
         </div>
     </div>
 
@@ -394,11 +394,11 @@ style="margin-left:10px;padding:8px 12px;border-radius:8px;border:none;backgroun
 
             <div class="grid-2">
                 <div class="input-group">
-                    <label>Admin Marketplace (%)</label>
+                    <label>Admin Produk (%)</label>
                     <input type="number" id="adminMarketplace" value="6">
                 </div>
                 <div class="input-group">
-                    <label>Biaya Promo (%)</label>
+                    <label>Admin Promo (%)</label>
                     <input type="number" id="freeOngkir" value="4">
                 </div>
             </div>
@@ -409,7 +409,7 @@ style="margin-left:10px;padding:8px 12px;border-radius:8px;border:none;backgroun
                     <input type="number" id="packing" value="2000">
                 </div>
                 <div class="input-group">
-                    <label>Biaya Per-pesanan (Rp)</label>
+                    <label>Biaya Per-Order (Rp)</label>
                     <input type="number" id="biayaLain" value="0">
                 </div>
             </div>
@@ -426,7 +426,7 @@ style="margin-left:10px;padding:8px 12px;border-radius:8px;border:none;backgroun
 
                 <h2 style="font-size: 0.9rem; font-weight: 900; margin-bottom: 15px; border-top: 1px solid #eee; pt-15">📈 PERFORMA IKLAN</h2>
                 <div class="input-group">
-                    <label>Total Ad Spend</label>
+                    <label>Jumlah Biaya Iklan</label>
                     <div class="input-wrapper">
                         <span class="input-prefix">Rp</span>
                         <input type="number" id="totalBiayaIklan" class="has-prefix" value="0">
@@ -438,7 +438,7 @@ style="margin-left:10px;padding:8px 12px;border-radius:8px;border:none;backgroun
                         <input type="number" id="jumlahKlik" value="0">
                     </div>
                     <div class="input-group">
-                        <label>Order Iklan</label>
+                        <label>Total Pesanan</label>
                         <input type="number" id="jumlahPesanan" value="0">
                     </div>
                 </div>
@@ -446,7 +446,7 @@ style="margin-left:10px;padding:8px 12px;border-radius:8px;border:none;backgroun
 
             <div id="roas-inputs" class="hidden">
                 <div class="input-group">
-                    <label>Target Laba Bersih (Rp)</label>
+                    <label>Target Margin Bersih (Rp)</label>
                     <div class="input-wrapper">
                         <span class="input-prefix">Rp</span>
                         <input type="number" id="targetMarginRp" class="has-prefix" value="15000">
@@ -458,72 +458,97 @@ style="margin-left:10px;padding:8px 12px;border-radius:8px;border:none;backgroun
         </section>
 
         <section id="results-view">
-            <div id="view-profit">
-                <div class="results-grid">
-                    <div class="res-card">
-                        <div class="res-label">Margin Kotor</div>
-                        <div class="res-value" id="res-margin-kotor">Rp 0</div>
-                    </div>
-                    <div class="res-card">
-                        <div class="res-label">Margin Bersih (Pre-Ads)</div>
-                        <div class="res-value" id="res-margin-bersih" style="color: var(--primary)">Rp 0</div>
-                    </div>
-                    <div class="res-card">
-                        <div class="res-label">ROAS Impas</div>
-                        <div class="res-value" id="res-roas-impas" style="color: var(--warning)">0.00x</div>
-                    </div>
-                    <div class="res-card">
-                        <div class="res-label">Laba / Order</div>
-                        <div class="res-value" id="res-final-profit">Rp 0</div>
-                    </div>
-                </div>
 
-                <div class="dashboard-row">
-                    <div class="card">
-                        <div class="res-label" style="margin-bottom: 20px;">Distribusi Biaya</div>
-                        <div class="chart-container">
-                            <svg width="180" height="180" viewBox="0 0 42 42" id="pie-chart">
-                                <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e2e8f0" stroke-width="5"></circle>
-                            </svg>
-                        </div>
-                        <div id="chart-legend" style="font-size: 10px; margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;"></div>
-                    </div>
+<!-- VIEW PROFIT -->
+<div id="view-profit">
 
-                    <div class="card">
-                        <div class="res-label" style="margin-bottom: 20px;">Performa Iklan</div>
-                        <div class="perf-item">
-                            <span>CPC</span>
-                            <span id="res-cpc" style="font-weight: 900;">Rp 0</span>
-                        </div>
-                        <div class="perf-item">
-                            <span>Konversi</span>
-                            <span id="res-cr" style="font-weight: 900;">0%</span>
-                        </div>
-                        <div class="perf-item">
-                            <span>CPA</span>
-                            <span id="res-cpa" style="font-weight: 900;">Rp 0</span>
-                        </div>
-                        <div id="roas-status-box" style="padding: 15px; border-radius: 12px; margin-top: 10px; text-align: center;">
-                            <div class="res-label">ROAS AKTUAL</div>
-                            <div id="res-roas-aktual" style="font-size: 1.5rem; font-weight: 900;">0.00x</div>
-                        </div>
-                    </div>
-                </div>
+<div class="results-grid">
+    <div class="res-card">
+        <div class="res-label">Margin Kotor</div>
+        <div class="res-value" id="res-margin-kotor">Rp 0</div>
+    </div>
 
-                <div class="summary-card">
-                    <div class="summary-header">RINGKASAN LABA BERSIH</div>
-                    <div class="summary-body">
-                        <div class="summary-box light-box">
-                            <div class="res-label">Laba / Order</div>
-                            <div class="res-value" id="sum-profit-order">Rp 0</div>
-                        </div>
-                        <div class="summary-box dark-box">
-                            <div class="res-label">Total Laba</div>
-                            <div class="res-value" id="sum-profit-total">Rp 0</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="res-card">
+        <div class="res-label">Margin Bersih (Pre-Ads)</div>
+        <div class="res-value" id="res-margin-bersih" style="color: var(--primary)">Rp 0</div>
+    </div>
+
+    <div class="res-card">
+        <div class="res-label">ROAS Impas</div>
+        <div class="res-value" id="res-roas-impas" style="color: var(--warning)">0.00x</div>
+    </div>
+
+    <div class="res-card">
+        <div class="res-label">Profit per-Order</div>
+        <div class="res-value" id="res-final-profit">Rp 0</div>
+    </div>
+</div>
+
+<div class="dashboard-row">
+
+<div class="card">
+<div class="res-label" style="margin-bottom: 20px;">Distribusi Biaya</div>
+
+<div class="chart-container">
+<svg width="180" height="180" viewBox="0 0 42 42" id="pie-chart">
+<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e2e8f0" stroke-width="5"></circle>
+</svg>
+</div>
+
+<div id="chart-legend" style="font-size: 10px; margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;"></div>
+
+</div>
+
+<div class="card">
+
+<div class="res-label" style="margin-bottom: 20px;">Performa Iklan</div>
+
+<div class="perf-item">
+<span>CPC (Biaya per-Klik)</span>
+<span id="res-cpc" style="font-weight: 900;">Rp 0</span>
+</div>
+
+<div class="perf-item">
+<span>Konversi</span>
+<span id="res-cr" style="font-weight: 900;">0%</span>
+</div>
+
+<div class="perf-item">
+<span>CPA (Biaya Iklan per-Order)</span>
+<span id="res-cpa" style="font-weight: 900;">Rp 0</span>
+</div>
+
+<div id="roas-status-box" style="padding: 15px; border-radius: 12px; margin-top: 10px; text-align: center;">
+<div class="res-label">ROAS AKTUAL</div>
+<div id="res-roas-aktual" style="font-size: 1.5rem; font-weight: 900;">0.00x</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="summary-card">
+
+<div class="summary-header">Ringkasan Profit</div>
+
+<div class="summary-body">
+
+<div class="summary-box light-box">
+<div class="res-label">Profit per-Order</div>
+<div class="res-value" id="sum-profit-order">Rp 0</div>
+</div>
+
+<div class="summary-box dark-box">
+<div class="res-label">Total Profit</div>
+<div class="res-value" id="sum-profit-total">Rp 0</div>
+</div>
+
+</div>
+
+</div>
+
+<!-- INSIGHT HITUNG PROFIT -->
+
 <div id="insightBox" style="
 margin-top:20px;
 background:#f8fafc;
@@ -532,7 +557,7 @@ padding:20px;
 border:1px solid #e2e8f0;
 ">
 
-<b>📊 Insight Anti-Boncos</b>
+<b>📊 Insight Hitung Profit</b>
 
 <div id="insightText" style="
 margin-top:10px;
@@ -542,38 +567,63 @@ color:#334155;
 "></div>
 
 </div>
-            <div id="view-roas" class="hidden">
-                <div class="card" style="margin-bottom: 20px;">
-                    <h3 class="res-label" style="color: var(--warning)">Target ROAS Impas</h3>
-                    <div class="grid-2">
-                        <div>
-                            <div class="res-label">Max Biaya / Order</div>
-                            <div class="res-value" id="target-max-bep">Rp 0</div>
-                        </div>
-                        <div>
-                            <div class="res-label">ROAS Impas</div>
-                            <div class="res-value text-success" id="target-roas-bep">0.00x</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3 class="res-label" style="color: var(--primary)">Target Performa</h3>
-                    <div class="grid-2">
-                        <div>
-                            <div class="res-label">Budget Iklan / Order</div>
-                            <div class="res-value" id="target-budget-cpa">Rp 0</div>
-                        </div>
-                        <div>
-                            <div class="res-label">Min. ROAS Target</div>
-                            <div class="res-value text-success" id="target-roas-final">0.00x</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Insight Target ROAS -->
+
+</div>
+
+
+
+<!-- VIEW ROAS -->
+
+<div id="view-roas" class="hidden">
+
+<div class="card" style="margin-bottom: 20px;">
+
+<h3 class="res-label" style="color: var(--warning)">Target ROAS Impas</h3>
+
+<div class="grid-2">
+
+<div>
+<div class="res-label">Max Biaya / Order</div>
+<div class="res-value" id="target-max-bep">Rp 0</div>
+</div>
+
+<div>
+<div class="res-label">ROAS Impas</div>
+<div class="res-value text-success" id="target-roas-bep">0.00x</div>
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h3 class="res-label" style="color: var(--primary)">Target Performa</h3>
+
+<div class="grid-2">
+
+<div>
+<div class="res-label">Max Biaya / Order</div>
+<div class="res-value" id="target-budget-cpa">Rp 0</div>
+</div>
+
+<div>
+<div class="res-label">Min. ROAS Target</div>
+<div class="res-value text-success" id="target-roas-final">0.00x</div>
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- INSIGHT TARGET ROAS -->
+
 <div style="
-margin:20px;
+margin-top:20px;
 background:#f8fafc;
 border:1px solid #e2e8f0;
 border-radius:12px;
@@ -581,6 +631,7 @@ padding:18px;
 font-size:14px;
 line-height:1.6;
 ">
+
 <b>📊 Insight Target ROAS</b>
 
 <div id="roasInsightText" style="margin-top:10px;">
@@ -588,6 +639,11 @@ Klik tombol hitung hasil untuk melihat analisis target ROAS.
 </div>
 
 </div>
+
+</div>
+
+</section>
+       
         </main>
     <script>
 
