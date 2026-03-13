@@ -333,6 +333,16 @@ background:#020617;
 .text-success { color: var(--success); }
 .text-danger { color: var(--danger); }
 
+/* --- EXPORT BUTTON --- */
+.export-btn{
+display:flex;
+align-items:center;
+gap:6px;
+padding:8px 14px;
+font-size:12px;
+width:auto;
+}
+
 /* --- DARK MODE TOGGLE --- */
 .theme-toggle{
 width:42px;
@@ -362,7 +372,7 @@ color:#fff;
 </head>
 <body>
 
-    <header>
+<header>
 
 <div class="header-container">
 
@@ -379,8 +389,8 @@ color:#fff;
 
 <div style="display:flex;align-items:center;gap:10px;">
 
-<button class="btn-primary" style="width:auto;padding:8px 16px;margin:0;font-size:10px;" onclick="exportCSV()">
-EXPORT CSV
+<button class="btn-primary export-btn" onclick="exportCSV()">
+⬇ Export
 </button>
 
 <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">
@@ -392,7 +402,6 @@ EXPORT CSV
 </div>
 
 </header>
-
     <div class="tabs-nav">
         <div class="tabs-container">
             <button class="tab-btn active" onclick="switchTab('profit')">Hitung Profit</button>
