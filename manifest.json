@@ -1,10 +1,11 @@
 {
-  "name": "Anti Boncos Tool",
+  "name": "Anti Boncos",
   "short_name": "AntiBoncos",
-  "start_url": "/",
+  "start_url": "/app.html",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#2563eb",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
