@@ -1255,7 +1255,7 @@ splash.style.display="none";
 const sku = document.getElementById("sku").value;
 const produk = document.getElementById("namaProduk").value;
 const harga = document.getElementById("simulasi-price").innerText;
-const profit = document.getElementById("sum-profit-order").innerText;
+const profit = document.getElementById("res-final-profit").innerText;
 const roas = document.getElementById("res-roas-impas").innerText;
 
 let history = JSON.parse(localStorage.getItem("antiBoncosHistory")) || [];
@@ -1289,7 +1289,7 @@ tbody.innerHTML = "";
 
 history.forEach(item => {
 
-tbody.innerHTML += `
+const row = `
 <tr>
 <td style="padding:6px;border:1px solid #e2e8f0">${item.sku}</td>
 <td style="padding:6px;border:1px solid #e2e8f0">${item.produk}</td>
@@ -1298,6 +1298,12 @@ tbody.innerHTML += `
 <td style="padding:6px;border:1px solid #e2e8f0">${item.roas}</td>
 </tr>
 `;
+
+tbody.innerHTML += row;
+
+});
+
+}
         renderHistory();
 </script>
 </body>
