@@ -8,6 +8,81 @@
 <meta name="theme-color" content="#2563eb">
     <title>ANTI BONCOS - Hitung Dulu Baru Jual</title>
     <style>
+        
+        /* ===== SPLASH SCREEN MODERN ===== */
+
+#splash-screen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:linear-gradient(135deg,#2563eb,#1e3a8a);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+color:white;
+}
+
+.splash-container{
+text-align:center;
+animation:fadeIn 0.8s ease;
+}
+
+.splash-logo{
+font-size:64px;
+margin-bottom:12px;
+animation:logoBounce 1s ease;
+}
+
+#splash-screen h1{
+font-size:28px;
+font-weight:800;
+margin-bottom:6px;
+}
+
+#splash-screen p{
+font-size:14px;
+opacity:0.9;
+margin-bottom:18px;
+}
+
+/* PROGRESS BAR */
+
+.progress-container{
+width:140px;
+height:5px;
+background:rgba(255,255,255,0.3);
+border-radius:10px;
+overflow:hidden;
+margin:auto;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:white;
+animation:progressLoad 1.3s ease forwards;
+}
+
+/* ANIMATIONS */
+
+@keyframes progressLoad{
+from{width:0}
+to{width:100%}
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(10px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes logoBounce{
+0%{transform:scale(0.7);opacity:0}
+70%{transform:scale(1.1)}
+100%{transform:scale(1)}
+}
         :root {
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
@@ -374,7 +449,25 @@ color:#fff;
 </style>
 </head>
 <body>
+<!-- SPLASH SCREEN MODERN -->
+<div id="splash-screen">
 
+<div class="splash-container">
+
+<div class="splash-logo">
+💰
+</div>
+
+<h1>ANTI BONCOS</h1>
+<p>Hitung Dulu Baru Jual</p>
+
+<div class="progress-container">
+<div class="progress-bar"></div>
+</div>
+
+</div>
+
+</div>
 <header>
 
 <div class="header-container">
@@ -407,13 +500,17 @@ color:#fff;
 <div style="display:flex;align-items:center;gap:10px;">
 
 <button class="btn-primary export-btn" onclick="exportCSV()">
-⬇ Unduh
+⬇ Save
 </button>
+
+    <button id="installBtn" class="btn-primary" style="display:none;">
+📲 Install App (1MB)
 
 <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">
 🌙
 </button>
 
+</button>
 </div>
 
 </div>
@@ -522,7 +619,37 @@ color:#fff;
 
             <button class="btn-primary" onclick="calculate()">HITUNG HASIL</button>
         </section>
+<!-- RIWAYAT ANALISIS -->
 
+<div class="card" style="margin-top:25px;">
+
+<div class="res-label" style="margin-bottom:15px;">
+📚 Riwayat Analisis Produk
+</div>
+
+<div style="overflow:auto">
+
+<table id="history-table" style="width:100%;font-size:12px;border-collapse:collapse">
+
+<thead>
+<tr style="background:#f1f5f9">
+<th style="padding:8px;border:1px solid #e2e8f0">SKU</th>
+<th style="padding:8px;border:1px solid #e2e8f0">Produk</th>
+<th style="padding:8px;border:1px solid #e2e8f0">Harga</th>
+<th style="padding:8px;border:1px solid #e2e8f0">Profit</th>
+<th style="padding:8px;border:1px solid #e2e8f0">ROAS</th>
+</tr>
+</thead>
+
+<tbody id="history-body">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
         <section id="results-view">
 
 <!-- VIEW PROFIT -->
@@ -593,12 +720,48 @@ color:#fff;
 
 </div>
 
+<!-- RINGKASAN PROFIT -->
 <div class="summary-card">
 
-<div class="summary-header">Ringkasan Profit</div>
+    <div class="summary-header">Ringkasan Profit</div>
 
-<div class="summary-body">
+    <div class="summary-body">
 
+        <div class="summary-box light-box">
+            <div class="res-label">Laba / Order</div>
+            <div class="res-value" id="sum-profit-order">Rp 0</div>
+        </div>
+
+        <div class="summary-box dark-box">
+            <div class="res-label">Total Laba</div>
+            <div class="res-value" id="sum-profit-total">Rp 0</div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- REKOMENDASI HARGA -->
+<div class="card" style="margin-top:20px;">
+
+    <div class="res-label" style="margin-bottom:15px;">
+        📊 Rekomendasi Harga Jual
+    </div>
+
+    <div class="grid-2">
+
+        <div class="res-card">
+            <div class="res-label">Harga Impas</div>
+            <div class="res-value" id="harga-impas">Rp 0</div>
+        </div>
+
+        <div class="res-card">
+            <div class="res-label">Harga Aman Iklan</div>
+            <div class="res-value" id="harga-aman">Rp 0</div>
+        </div>
+
+        <div class="res-card">
+            <div class="res-label">Harga Ideal Scale</
 <div class="summary-box light-box">
 <div class="res-label">Profit per-Order</div>
 <div class="res-value" id="sum-profit-order">Rp 0</div>
@@ -780,7 +943,22 @@ if (localStorage.getItem("isLoggedIn") !== "true") {
 
             // Target Calculations
             const maxIklanTarget = marginBersihAwal - targetLaba;
-            const roasTarget = maxIklanTarget > 0 ? hargaSimulasi / maxIklanTarget : 0;
+            saveHistory();
+            /* ===== REKOMENDASI HARGA ===== */
+
+// harga impas
+const hargaImpas = totalBiayaTetap;
+
+// harga aman iklan (margin kecil)
+const hargaAman = totalBiayaTetap + 10000;
+
+// harga ideal scale (margin besar)
+const hargaScale = totalBiayaTetap + 20000;
+
+// tampilkan ke UI
+document.getElementById("harga-impas").innerText = formatIDR(hargaImpas);
+document.getElementById("harga-aman").innerText = formatIDR(hargaAman);
+document.getElementById("harga-scale").innerText = formatIDR(hargaScale);
 
             // Update UI - View 1
             document.getElementById('slider-val').innerText = slider + '%';
@@ -1028,6 +1206,99 @@ console.log("Service Worker gagal:", error);
 });
 });
 }
+</script>
+    <script>
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+
+    e.preventDefault();
+
+    deferredPrompt = e;
+
+    document.getElementById("installBtn").style.display = "inline-block";
+
+});
+
+document.getElementById("installBtn").addEventListener("click", async () => {
+
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    const { outcome } = await deferredPrompt.userChoice;
+
+    deferredPrompt = null;
+
+});
+window.addEventListener("load", function(){
+
+setTimeout(function(){
+
+const splash = document.getElementById("splash-screen");
+
+if(splash){
+splash.style.opacity="0";
+
+setTimeout(()=>{
+splash.style.display="none";
+},300);
+
+}
+
+},1300);
+
+});
+        function saveHistory(){
+
+const sku = document.getElementById("sku").value;
+const produk = document.getElementById("namaProduk").value;
+const harga = document.getElementById("simulasi-price").innerText;
+const profit = document.getElementById("sum-profit-order").innerText;
+const roas = document.getElementById("res-roas-impas").innerText;
+
+let history = JSON.parse(localStorage.getItem("antiBoncosHistory")) || [];
+
+history.unshift({
+sku,
+produk,
+harga,
+profit,
+roas
+});
+
+if(history.length > 50){
+history.pop();
+}
+
+localStorage.setItem("antiBoncosHistory", JSON.stringify(history));
+
+renderHistory();
+
+}
+        function renderHistory(){
+
+const history = JSON.parse(localStorage.getItem("antiBoncosHistory")) || [];
+
+const tbody = document.getElementById("history-body");
+
+if(!tbody) return;
+
+tbody.innerHTML = "";
+
+history.forEach(item => {
+
+tbody.innerHTML += `
+<tr>
+<td style="padding:6px;border:1px solid #e2e8f0">${item.sku}</td>
+<td style="padding:6px;border:1px solid #e2e8f0">${item.produk}</td>
+<td style="padding:6px;border:1px solid #e2e8f0">${item.harga}</td>
+<td style="padding:6px;border:1px solid #e2e8f0">${item.profit}</td>
+<td style="padding:6px;border:1px solid #e2e8f0">${item.roas}</td>
+</tr>
+`;
+        renderHistory();
 </script>
 </body>
 </html>
