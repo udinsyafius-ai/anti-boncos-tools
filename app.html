@@ -619,37 +619,7 @@ color:#fff;
 
             <button class="btn-primary" onclick="calculate()">HITUNG HASIL</button>
         </section>
-<!-- RIWAYAT ANALISIS -->
 
-<div class="card" style="margin-top:25px;">
-
-<div class="res-label" style="margin-bottom:15px;">
-📚 Riwayat Analisis Produk
-</div>
-
-<div style="overflow:auto">
-
-<table id="history-table" style="width:100%;font-size:12px;border-collapse:collapse">
-
-<thead>
-<tr style="background:#f1f5f9">
-<th style="padding:8px;border:1px solid #e2e8f0">SKU</th>
-<th style="padding:8px;border:1px solid #e2e8f0">Produk</th>
-<th style="padding:8px;border:1px solid #e2e8f0">Harga</th>
-<th style="padding:8px;border:1px solid #e2e8f0">Profit</th>
-<th style="padding:8px;border:1px solid #e2e8f0">ROAS</th>
-</tr>
-</thead>
-
-<tbody id="history-body">
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
         <section id="results-view">
 
 <!-- VIEW PROFIT -->
@@ -943,7 +913,7 @@ if (localStorage.getItem("isLoggedIn") !== "true") {
 
             // Target Calculations
             const maxIklanTarget = marginBersihAwal - targetLaba;
-            saveHistory();
+            
             /* ===== REKOMENDASI HARGA ===== */
 
 // harga impas
@@ -1250,38 +1220,6 @@ splash.style.display="none";
 },1300);
 
 });
-        function saveHistory(){
-
-const sku = document.getElementById("sku").value;
-const produk = document.getElementById("namaProduk").value;
-const harga = document.getElementById("simulasi-price").innerText;
-const profit = document.getElementById("res-final-profit").innerText;
-const roas = document.getElementById("res-roas-impas").innerText;
-
-let history = JSON.parse(localStorage.getItem("antiBoncosHistory")) || [];
-
-history.unshift({
-sku,
-produk,
-harga,
-profit,
-roas
-});
-
-if(history.length > 50){
-history.pop();
-}
-
-localStorage.setItem("antiBoncosHistory", JSON.stringify(history));
-
-renderHistory();
-
-}
-        function renderHistory(){
-
-const history = JSON.parse(localStorage.getItem("antiBoncosHistory")) || [];
-
-const tbody = document.getElementById("history-body");
 
 if(!tbody) return;
 
@@ -1304,7 +1242,7 @@ tbody.innerHTML += row;
 });
 
 }
-        renderHistory();
+
 </script>
 </body>
 </html>
